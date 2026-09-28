@@ -23,7 +23,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama</th>
-                                <th>NIM</th>
+                                <th>No Register</th>
                                 <th>Jurusan</th>
                             </tr>
                         </thead>

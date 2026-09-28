@@ -35,6 +35,7 @@ class Kernel extends HttpKernel
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\InjectLogoutForm::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
@@ -56,6 +57,7 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'authadmin' => \App\Http\Middleware\AuthAdmin::class,
         'authuser' => \App\Http\Middleware\AuthUser::class,
+        'authusertryout' => \App\Http\Middleware\AuthUserTryout::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,

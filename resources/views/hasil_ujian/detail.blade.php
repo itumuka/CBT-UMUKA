@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -25,13 +25,14 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-striped">
-                        <thead class="table">
+                    <table class="table table-bordered table-hover table-striped align-middle">
+                        <thead>
                             <tr>
                                 <th width="5%">No</th>
                                 <th>Nama Peserta</th>
                                 <th>Jumlah Benar</th>
                                 <th>Status</th>
+                                <th width="15%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -41,6 +42,9 @@
                                 <td>{{ $hasil->nama }}</td>
                                 <td>{{ $hasil->jml_benar }}</td>
                                 <td>{{ $hasil->status_lulus }}</td>
+                                <td>
+                                    <a href="{{ route('hasil-ujian.batalkan', ['id' => $hasil->id_user, 'tes_id' => $hasil->id_tes]) }}" class="btn btn-sm btn-warning" onclick="return confirm('Reset attempt ini? Hasil dihapus dan akun dapat mengulang.')">Reset</a>
+                                </td>
                             </tr>
                             @empty
                             <tr>

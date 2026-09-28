@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -7,13 +7,14 @@
 @stop
 
 @section('content')
+@php $rp = $rp ?? ''; @endphp
 <div class="container mt-4">
     <div class="card w-50">
         <div class="card-header text-white bg-primary" >
-            Tambah Data Siswa
+            Tambah Data Siswa @isset($modeLabel)<span class="badge bg-light text-dark">{{ $modeLabel }}</span>@endisset
         </div>
         <div class="card-body">
-            <form action="{{ route('siswa.store') }}" method="POST">
+            <form action="{{ route($rp.'siswa.store') }}" method="POST">
                 @csrf
                 
                 <div class="mb-3">
@@ -25,12 +26,22 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="nim" class="form-label">NIM</label>
-                    <input type="text" name="nim" class="form-control @error('nim') is-invalid @enderror" value="{{ old('nim') }}" required>
+                    <label for="nim" class="form-label">NIM @if(($mode ?? 'cbt') === 'tryout')(opsional untuk Tryout)@endif</label>
+                    <input type="text" name="nim" class="form-control @error('nim') is-invalid @enderror" value="{{ old('nim') }}" @if(($mode ?? 'cbt') === 'cbt')required @endif>
                     @error('nim')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+
+                @if(($mode ?? 'cbt') === 'tryout')
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email (untuk login)</label>
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                @endif
                 
                 <div class="mb-3">
                     <label for="jurusan" class="form-label">Jurusan</label>
@@ -58,7 +69,7 @@
                 </div>
                 
                 <button type="submit" class="btn text-white bg-success">Tambah Siswa</button>
-                <a href="{{ route('siswa.index') }}" class="btn btn-secondary">Batal</a>
+                <a href="{{ route($rp.'siswa.index') }}" class="btn btn-secondary">Batal</a>
             </form>
         </div>
     </div>

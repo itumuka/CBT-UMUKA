@@ -11,7 +11,7 @@ class Soal extends Model
 
     protected $table = 'm_soal'; // Nama tabel di database
     protected $fillable = ['id_mapel','bobot','file','tipe_file','soal','opsi_a','opsi_b','opsi_c','opsi_d','opsi_e',
-    'jawaban','tgl_input','jml_benar','jml_salah', 'updated_at', 'created_at']; 
+    'jawaban','tgl_input','jml_benar','jml_salah','jenis','sumber', 'updated_at', 'created_at']; 
 
     public function mapel()
     {

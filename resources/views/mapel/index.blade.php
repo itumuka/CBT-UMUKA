@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -31,43 +31,82 @@
                     
                 </form>
 
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-striped">
-                        <thead class="table">
-                            <tr>
-                                <th width="5%">No</th>
-                                <th>Nama</th>
-                                <th width="30%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($mapels as $mapel)
-                            <tr>
-                                <td>{{ $loop->iteration + ($mapels->firstItem() - 1) }}</td>
-                                <td>{{ $mapel->nama }}</td>
-                                <td>
-                                    <a href="{{ url('/mapel/' . $mapel->id . '/edit') }}" class="btn btn-primary btn-sm">Edit</a>
-                        
-                                    <form action="{{ route('mapel.destroy', $mapel->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                    </form> 
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center">Data tidak ditemukan</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                        
-                    </table>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Mapel Wajib</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($mapelWajib as $mapel)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $mapel->nama }}</td>
+                                        <td>
+                                            <a href="{{ url('/mapel/' . $mapel->id . '/edit') }}" class="btn btn-primary btn-sm">Edit</a>
+                                            <form action="{{ route('mapel.destroy', $mapel->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center">Tidak ada data</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5>Mapel Pilihan</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($mapelPilihan as $mapel)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $mapel->nama }}</td>
+                                        <td>
+                                            <a href="{{ url('/mapel/' . $mapel->id . '/edit') }}" class="btn btn-primary btn-sm">Edit</a>
+                                            <form action="{{ route('mapel.destroy', $mapel->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center">Tidak ada data</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $mapels->appends(request()->query())->links() }}
+                <!-- Summary -->
+                <div class="d-flex justify-content-between mt-3">
+                    <div><strong>Total Wajib:</strong> {{ $mapelWajib->count() }}</div>
+                    <div><strong>Total Pilihan:</strong> {{ $mapelPilihan->count() }}</div>
                 </div>
             </div>
         </div>
