@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -12,19 +12,18 @@
 
 @section('content')
 
-<div class="container">
+<div class="container py-4">
     <!-- Card Utama -->
-    <div class="card shadow-lg p-4">
-        <div class="card-body">
-            <p class="alert alert-primary">Selamat datang di sistem ujian online <strong> {{ session('nama') }} </strong> </p>
-
-            
-                    </div>
-                </div>
-            </div>
+    <div class="card shadow-lg p-0 overflow-hidden" style="border:0;border-radius:18px;">
+        <div class="px-4 py-4 text-white" style="background:linear-gradient(120deg,#254baa 0%,#06b6d4 100%);">
+            <h4 class="mb-1"><i class="fas fa-graduation-cap me-2"></i>Dashboard Tryout</h4>
+            <div class="opacity-75 small">Selamat datang di sistem ujian online</div>
         </div>
-    </div> <!-- End of Card Utama -->
-</div> <!-- End of Container -->
+        <div class="card-body p-4">
+            <p class="alert alert-primary border-0">Halo, <strong>{{ session('nama') }}</strong>! Pilih menu <strong>Ujian</strong> untuk melihat daftar tryout yang tersedia.</p>
+        </div>
+    </div>
+</div>
 
 @stop
 

@@ -1,0 +1,68 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.backup
+.env.production
+
+# IDE files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (will be installed in container)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Vendor (will be installed in container)
+vendor/
+
+# Build files
+*.zip
+*.7z
+*.tar.gz
+
+# Testing
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Development files
+*.md
+LICENSE
+
+# Storage files (mounted as volume)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# Public upload files (mounted as volume)
+public/upload/*
+public/filebayar/*
+
+# Docker files (no need to copy docker configs to image)
+docker-compose*.yml
+.dockerignore
+
+# Scripts
+scripts/
+
+# Backup files
+*.bak
+*.backup
+
+# SQL dumps (keep out of build context)
+*.sql
+*.sql.gz

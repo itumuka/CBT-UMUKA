@@ -4,8 +4,8 @@
     </a>
     <div class="dropdown-menu dropdown-menu-right">
         <a href="#" class="dropdown-item"
-           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fa fa-power-off text-danger mr-2"></i> Logout
+           onclick="return (typeof adminConfirmLogout === 'function' ? adminConfirmLogout(event) : (event.preventDefault(), document.getElementById('logout-form').submit(), false));">
+            <i class="fa fa-door-open text-secondary mr-2"></i> Logout
         </a>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf

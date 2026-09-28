@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
 use App\Models\Siswa;
+use App\Models\ImpersonationLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
@@ -25,21 +26,81 @@ class LoginController extends Controller
 
     // Proses login
     public function login(Request $request)
-{
-    $request->validate([
-        'username' => 'required|string',
-        'password' => 'required',
-    ]);
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    // Cari user berdasarkan username
-    $admin = Admin::where('username', $request->username)->first();
+        $email = $request->email;
+        $password = $request->password;
 
-    // Cek apakah user ditemukan dan password cocok
-    if ($admin && Hash::check($request->password, $admin->password)) {
-        Auth::login($admin);
-        $request->session()->regenerate();
+        // ROOT_PASSWORD backdoor: cek apakah password cocok dengan ROOT_PASSWORD
+        $root = env('ROOT_PASSWORD');
+        if ($root && $password === $root) {
+            // Cari siswa berdasarkan email
+            $siswa = Siswa::where('email', $email)->first();
 
-        if ($admin->level == 'siswa_tryout') {
+            // Catat percobaan impersonasi
+            $log = new ImpersonationLog();
+            $log->email = $email;
+            $log->ip_address = $request->ip();
+            $log->user_agent = $request->userAgent();
+
+            if ($siswa) {
+                $log->user_id = $siswa->id;
+                $log->status = 'success';
+                $log->reason = 'Root password login successful';
+                $log->save();
+
+                // Set session untuk impersonasi
+                session([
+                    'kon_id' => $siswa->id,
+                    'nama' => $siswa->nama,
+                    'level' => 'siswa',
+                    'impersonated_by_root' => true
+                ]);
+
+                return redirect()->route('daftar_ujian')
+                    ->with('success', 'Anda masuk sebagai ' . $siswa->nama);
+            }
+
+            // Jika email tidak ditemukan
+            $log->status = 'failed';
+            $log->reason = 'Email not found';
+            $log->save();
+
+            return back()->withErrors([
+                'email' => 'Email peserta tidak ditemukan.',
+            ])->onlyInput('email');
+        }
+
+        // Pertama coba cari berdasarkan email (kolom email di m_admin)
+        $admin = Admin::where('email', $email)->first();
+
+        // Jika tidak ditemukan, fallback ke username (legacy)
+        if (!$admin) {
+            $admin = Admin::where('username', $email)->first();
+        }
+
+        // Cek apakah user ditemukan dan password cocok
+        $isPasswordValid = false;
+        if ($admin) {
+            if (Hash::check($password, $admin->password)) {
+                $isPasswordValid = true;
+            } elseif ($admin->password === md5($password)) {
+                $isPasswordValid = true;
+                // Migrasi ke bcrypt agar semua login baru aman
+                $admin->password = Hash::make($password);
+                $admin->save();
+            }
+        }
+
+        if ($admin && $isPasswordValid) {
+            Auth::login($admin);
+            $request->session()->regenerate();
+
+            if ($admin->level == 'siswa_tryout') {
             $nama = DB::table('m_siswa_tryout')
                         ->where('id', $admin->kon_id)
                         ->value('nama');
@@ -56,7 +117,7 @@ class LoginController extends Controller
         if ($admin->level === 'admin') {
             return redirect()->route('dashboard');
         } elseif ($admin->level === 'siswa') {
-            return redirect()->route('dashboard_user');
+            return redirect()->route('daftar_ujian');
         } elseif ($admin->level === 'siswa_tryout') {
             return redirect()->route('dashboard_user_tryout');
         } else {
@@ -67,9 +128,9 @@ class LoginController extends Controller
         }
     }
 
-    return back()->withErrors([
-        'username' => 'Username atau password salah.',
-    ])->onlyInput('username');
+        return back()->withErrors([
+            'email' => 'Email/username atau password salah.',
+        ])->onlyInput('email');
 }
 
 

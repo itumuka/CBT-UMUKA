@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Edit Mapel')
 
@@ -22,6 +22,17 @@
                     <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror" 
                            value="{{ old('nama', $mapel->nama) }}" required>
                     @error('nama')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="mb-3">
+                    <label for="kategori" class="form-label">Kategori</label>
+                    <select name="kategori" class="form-control @error('kategori') is-invalid @enderror" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="wajib" {{ old('kategori', $mapel->kategori) == 'wajib' ? 'selected' : '' }}>Wajib</option>
+                        <option value="pilihan" {{ old('kategori', $mapel->kategori) == 'pilihan' ? 'selected' : '' }}>Pilihan</option>
+                    </select>
+                    @error('kategori')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

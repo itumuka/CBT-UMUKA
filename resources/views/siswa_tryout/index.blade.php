@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -28,8 +28,8 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-striped">
-                        <thead class="table">
+                    <table class="table table-bordered table-hover table-striped align-middle">
+                        <thead>
                             <tr>
                                 <th>No</th>
                                 <th>Nama</th>

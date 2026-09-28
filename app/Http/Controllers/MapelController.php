@@ -12,18 +12,20 @@ class MapelController extends Controller
 {
     public function index(Request $request)
 {
-    $query = Mapel::query();
+    $search = $request->get('search');
 
-    // Jika ada pencarian
-    if ($request->has('search')) {
-        $search = $request->search;
-        $query->where('nama', 'like', "%$search%");
+    $wajibQuery = Mapel::where('kategori', 'wajib');
+    $pilihanQuery = Mapel::where('kategori', 'pilihan');
+
+    if ($search) {
+        $wajibQuery->where('nama', 'like', "%$search%");
+        $pilihanQuery->where('nama', 'like', "%$search%");
     }
 
-    // Ambil data dengan pagination (10 data per halaman)
-    $mapels = $query->paginate(10);
+    $mapelWajib = $wajibQuery->orderBy('nama')->get();
+    $mapelPilihan = $pilihanQuery->orderBy('nama')->get();
 
-    return view('mapel.index', compact('mapels'));
+    return view('mapel.index', compact('mapelWajib', 'mapelPilihan', 'search'));
 }
 
 public function create()
@@ -37,12 +39,13 @@ public function store(Request $request)
     // Validasi Input
     $request->validate([
         'nama' => 'required|string|max:255',
-        
+            'kategori' => 'required|in:wajib,pilihan'
     ]);
 
     // Simpan Data ke Database
     Mapel::create([
         'nama' => $request->nama,
+            'kategori' => $request->kategori,
 
     ]);
 

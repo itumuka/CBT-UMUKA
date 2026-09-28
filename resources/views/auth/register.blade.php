@@ -2,24 +2,35 @@
 
 @section('content')
 
+@section('title', 'Register')
+
 <style>
-    img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+    .auth-wrapper { min-height: calc(100vh - 3.5rem); }
+    @media (min-width: 768px) {
+        .auth-card { max-width: 680px; }
     }
+    @media (max-width: 767px) {
+        .auth-card { width: 100%; }
+    }
+    .brand-logo { display:block; margin: 0 auto 0.5rem; }
+    .mapel-list { padding-left: 1rem; }
 </style>
 
-<div class="container">
-    <div class="d-flex justify-content-center align-items-center">
-        <div class="col-md-9 d-flex justify-content-center align-items-center">
-            <div class="card w-50 ">
-                <div class="card-header text-center">
-                    <img src="/image/umuka.png" alt="Logo" width="50">
-                    <h5 style='font-weight:700;'>CBT UMUKA</h5>
-                </div>
+<div class="container auth-wrapper d-flex align-items-center justify-content-center">
+    <div class="card auth-card shadow-sm w-100">
+        <div class="card-body p-4">
+            <div class="text-center mb-3">
+                <img src="/image/umuka.png" alt="Logo" class="brand-logo img-fluid" width="64">
+                <h5 class="mb-0 fw-bold">CBT UMUKA</h5>
+                @if(isset($activeSession) && $activeSession)
+                    <span class="badge bg-success mt-2">Sesi aktif: {{ strtoupper($activeSession->name) }}</span>
+                @else
+                    <span class="badge bg-secondary mt-2">Sesi aktif: CBT</span>
+                @endif
+            </div>
 
-        <div class="card-body">
+            <div>
+            @if(!isset($registrationOpen) || $registrationOpen)
             <form method="POST" action="{{ route('register.post') }}">
                 @csrf
                 
@@ -48,17 +59,30 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                               name="email" value="{{ old('email') }}" required maxlength="255"
+                               placeholder="nama@domain.com">
+                        @error('email')
+                            <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="mb-3">
                     <label for="no_hp" class="form-label">Nomor HP</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-phone"></i></span>
                         <input id="no_hp" 
-                            type="text" 
+                            type="tel" 
                             class="form-control @error('no_hp') is-invalid @enderror" 
                             name="no_hp" 
                             value="{{ old('no_hp') }}" 
                             required 
-                            maxlength="15"
-                            pattern="[0-9]+"
+                            maxlength="13"
+                            pattern="08[0-9]{8,11}"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                             placeholder="Contoh: 081234567890">
                         @error('no_hp')
@@ -114,10 +138,48 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Status Akun</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status_akun" 
+                                   id="status_real" value="real" checked>
+                            <label class="form-check-label" for="status_real">
+                                <i class="fas fa-user"></i> Akun Peserta
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status_akun" 
+                                   id="status_test" value="test">
+                            <label class="form-check-label" for="status_test">
+                                <i class="fas fa-vial"></i> Akun Tester
+                            </label>
+                        </div>
+                    </div>
+                    @error('status_akun')
+                        <span class="text-danger"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary">Register</button>
                 </div>
             </form>
+            @else
+                <div class="alert alert-danger text-center">
+                    <h5 class="mb-1">Pendaftaran Ditutup</h5>
+                    <div>Pendaftaran untuk tryout saat ini sedang ditutup. Silakan cek kembali nanti atau hubungi panitia untuk informasi lebih lanjut.</div>
+                </div>
+            @endif
+
+            <div class="text-center mt-3">
+                <p class="mb-0 text-muted">
+                    Sudah memiliki akun? 
+                    <a href="{{ url('/') }}" class="text-primary text-decoration-none fw-bold">
+                        Masuk sekarang <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -129,13 +191,36 @@
             cb.addEventListener('change', function () {
                 const checked = document.querySelectorAll('.mapel-pilihan:checked');
                 
-                // Cegah jika lebih dari 2
-                if (checked.length > 2) {
-                    this.checked = false;
-                    alert('Maksimal hanya boleh memilih 2 mapel pilihan!');
-                }
+                        // Cegah jika lebih dari 2
+                        if (checked.length > 2) {
+                            this.checked = false;
+                            // nicer UX
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({ icon: 'warning', title: 'Pilih maksimal 2', text: 'Maksimal hanya boleh memilih 2 mapel pilihan.' });
+                            } else {
+                                alert('Maksimal hanya boleh memilih 2 mapel pilihan!');
+                            }
+                        }
             });
+        });
+
+        // Validasi nomor HP sebelum submit
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            const noHp = document.getElementById('no_hp').value.trim();
+            const re = /^08[0-9]{8,11}$/; // 10-13 digit total starting with 08
+            if (!re.test(noHp)) {
+                e.preventDefault();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'error', title: 'Nomor HP tidak valid', text: 'Pastikan dimulai dengan 08 dan memiliki panjang antara 10 hingga 13 digit.' });
+                } else {
+                    alert('Nomor HP tidak valid. Pastikan dimulai dengan 08 dan memiliki panjang antara 10 hingga 13 digit.');
+                }
+                return false;
+            }
         });
     });
 </script>
+<!-- include SweetAlert2 for register page if available -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

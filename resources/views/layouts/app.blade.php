@@ -7,7 +7,22 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    @php
+        $title = config('app.name', 'CBT');
+        if (trim($__env->yieldContent('title')) !== '') {
+            $t = trim($__env->yieldContent('title'));
+            // If the title is exactly 'Login' or 'Register', show only that
+            if (in_array($t, ['Login', 'Register'])) {
+                $title = $t;
+            } else {
+                $title = $t . ' - ' . config('app.name', 'CBT');
+            }
+        }
+    @endphp
+    <title>{{ $title }}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/image/umuka.png">
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -73,12 +88,76 @@
             </div>
         </nav> --}}
 
+        {{-- Persistent logout button for authenticated users --}}
+        @auth
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                @csrf
+            </form>
+        @endauth
+
         <main class="py-4">
             @yield('content')
         </main>
     </div>
 
     @stack('scripts')
+
+    {{-- SweetAlert2 CDN (fallback jika belum ada) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Sidebar logout handler: when AdminLTE renders the menu item with class 'menu-logout', intercept click
+        document.addEventListener('DOMContentLoaded', function () {
+                document.body.addEventListener('click', function (e) {
+                    // element with explicit class
+                    var t = e.target.closest && e.target.closest('.menu-logout');
+                    // anchor exactly '#logout'
+                    var aExact = e.target.closest && e.target.closest('a[href="#logout"]');
+                    // anchor whose href contains the fragment '#logout' (handles '/ujian#logout' etc.)
+                    var aAny = (function () {
+                        var a = e.target.closest && e.target.closest('a');
+                        if (!a) return null;
+                        var h = a.getAttribute('href') || '';
+                        return h.indexOf('#logout') !== -1 ? a : null;
+                    })();
+
+                    if (t || aExact || aAny) {
+                        console.debug('[logout] intercepted click', { foundClass: !!t, exact: !!aExact, any: !!aAny });
+                        e.preventDefault();
+                        var f = document.getElementById('logout-form');
+                        console.debug('[logout] logout-form present:', !!f);
+                        if (f) f.submit();
+                    }
+                });
+
+                // Also proactively attach an inline onclick to any logout anchors so they submit POST directly
+                try {
+                    var anchors = document.querySelectorAll('a[href="#logout"], a[href*="#logout"]');
+                    console.debug('[logout] anchors found:', anchors.length);
+                    anchors.forEach(function (a) {
+                        a.setAttribute('onclick', "event.preventDefault(); document.getElementById('logout-form').submit();");
+                    });
+                    var f = document.getElementById('logout-form');
+                    console.debug('[logout] logout-form initial presence:', !!f);
+                } catch (err) {
+                    console.error('[logout] error attaching onclick to anchors', err);
+                }
+        });
+    </script>
+
+    {{-- Show generic success after registration; don't reveal token in the UI. --}}
+    @if(session()->has('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    title: 'Registrasi berhasil',
+                    text: '{{ session("success") }} Silakan masuk menggunakan akun Anda.',
+                    icon: 'success',
+                    confirmButtonText: 'Menuju Login'
+                }).then(() => { window.location.href = '{{ route("login") }}'; });
+            });
+        </script>
+    @endif
 
 </body>
 </html>
